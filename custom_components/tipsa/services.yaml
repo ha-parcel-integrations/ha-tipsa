@@ -1,0 +1,20 @@
+track_parcel:
+  fields:
+    tracking_code:
+      required: true
+      example: "0000100000100000000000"
+      selector:
+        text:
+    postal_code:
+      required: false
+      example: "28001"
+      selector:
+        text:
+
+untrack_parcel:
+  fields:
+    tracking_code:
+      required: true
+      example: "0000100000100000000000"
+      selector:
+        text:
