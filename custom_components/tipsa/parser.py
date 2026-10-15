@@ -1,16 +1,16 @@
-"""Parser for the TIPSA shipment page.
+"""Reader for TIPSA's shipment tracking response.
 
-The page is server-rendered HTML with no structured alternative, so the parser
-fails closed: anything it cannot positively identify raises
-:class:`TIPSAParseError` instead of yielding a partial parcel.
+The response carries no structured alternative, so this module fails closed:
+anything it cannot positively identify raises :class:`TIPSAParseError`
+instead of yielding a partial parcel.
 
-The set of nodes read *is* the record. The page asterisk-masks the recipient's
-name and street address and then prints the same address, town and postcode
-unmasked in other cells, so a mask is not a privacy boundary. Every cell is
-therefore matched against an allow-list of ``(section, label)`` pairs and
-anything else is dropped on the spot: the recipient, contact, address, town,
-postcode and notes cells never reach the result. Do not widen the allow-list
-without re-reading that boundary.
+The set of fields read *is* the record. TIPSA asterisk-masks the recipient's
+name and street address and then states the same address, town and postcode
+unmasked elsewhere in the reply, so a mask is not a privacy boundary. Every
+field is therefore matched against an allow-list of ``(section, label)``
+pairs and anything else is dropped on the spot: the recipient, contact,
+address, town, postcode and notes fields never reach the result. Do not widen
+the allow-list without re-reading that boundary.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from html.parser import HTMLParser
 from zoneinfo import ZoneInfo
 
-PAGE_TIMEZONE = ZoneInfo("Europe/Madrid")
+RESPONSE_TIMEZONE = ZoneInfo("Europe/Madrid")
 
 _SECTION_GENERAL = "DATOS GENERALES"
 _SECTION_DELIVERY = "DATOS DE LA ENTREGA"
@@ -221,7 +221,7 @@ def _events(rows: list[list[str]]) -> list[dict]:
             raise TIPSAParseError("history row has an unexpected number of cells")
         try:
             moment = datetime.strptime(row[0], _EVENT_TIME_FORMAT).replace(
-                tzinfo=PAGE_TIMEZONE
+                tzinfo=RESPONSE_TIMEZONE
             )
         except ValueError as err:
             raise TIPSAParseError("history row has an unparseable timestamp") from err

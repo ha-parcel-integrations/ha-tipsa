@@ -114,7 +114,7 @@ Standard HA removal applies: **Settings → Devices & Services → TIPSA → ⋮
 | `sensor.tipsa_<postcode>_incoming_parcels` | Number of active tracked parcels, full list under the `parcels` attribute |
 | `sensor.tipsa_<postcode>_parcel_<code>` | One per tracked parcel; state is the canonical status, attributes carry the full normalised parcel |
 | `sensor.tipsa_<postcode>_next_delivery` | The next delivery. TIPSA publishes no ETA, so this stays empty |
-| `sensor.tipsa_<postcode>_en_route_to_pickup_point` | Parcels heading for a pickup point. TIPSA's page does not announce this in advance, so it stays empty |
+| `sensor.tipsa_<postcode>_en_route_to_pickup_point` | Parcels heading for a pickup point. TIPSA does not announce this in advance, so it stays empty |
 | `sensor.tipsa_<postcode>_awaiting_pickup` | Parcels waiting at a TIPSA collection point |
 | `sensor.tipsa_<postcode>_delivered_parcels` | Recently delivered parcels (see the retention option) |
 | `sensor.tipsa_<postcode>_last_successful_update` | Diagnostic: when TIPSA was last polled successfully |
@@ -135,9 +135,9 @@ The `status` field is the carrier-agnostic enum shared by the whole integration 
 | `problem` | A delivery attempt found nobody in (`Ausente`), or TIPSA reported an incident (`INCIDENCIA`) |
 | `unknown` | The parcel is not found, or a status we have not mapped yet |
 
-TIPSA's page also shows `Mal clasificado` (missorted); it is reported as `in_transit`, because the parcel it was seen on recovered and was delivered normally.
+TIPSA also reports `Mal clasificado` (missorted); it is reported as `in_transit`, because the parcel it was seen on recovered and was delivered normally.
 
-Two wordings are mapped from another public tracker's observations rather than from a parcel of our own: `LEIDO EN DESTINO` (read at the destination) as `in_transit`, and `Ausente` (nobody in) as `problem`. No return wording has been seen yet, so `returning` is never reported.
+Two wordings are mapped from what TIPSA reports for other people's parcels rather than from a parcel tracked here, so each asks once in the log whether it reads correctly: `LEIDO EN DESTINO` (read at the destination) as `in_transit`, and `Ausente` (nobody in) as `problem`. No return wording has been seen yet, so `returning` is never reported.
 
 The carrier's own human-readable text is always available as `raw_status`.
 
@@ -202,7 +202,7 @@ All third-party trademarks, trade names, product names, logos, and other brand a
 
 This integration may rely on public, unofficial, or undocumented carrier interfaces, accessed with your own account or API key where required. These may change or be withdrawn without notice and may be subject to TIPSA's terms. Data is sent only to TIPSA's own services or those of its group; this project operates no servers of its own. You are responsible for ensuring that your use complies with applicable law and those terms. Use is at your own risk; see the [licence](LICENSE) for warranty limitations.
 
-This integration reads the same public shipment page that TIPSA publishes for each parcel, and sends it your postcode and the parcel's tracking code. It never uses TIPSA's registered-client area.
+This integration reads the same public shipment lookup that TIPSA offers for each parcel, and sends it your postcode and the parcel's tracking code. It never uses TIPSA's registered-client area.
 
 ## Contributing
 

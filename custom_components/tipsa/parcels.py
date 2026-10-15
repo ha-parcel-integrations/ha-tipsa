@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # Where users report a status we do not map yet. Rewritten by the bootstrap
 # script; it must point at the carrier's own repo so the log line is
-_PAGE_TIMEZONE = ZoneInfo("Europe/Madrid")
+_RESPONSE_TIMEZONE = ZoneInfo("Europe/Madrid")
 
 # Keys are normalised wordings (see :func:`normalize_wording`). TIPSA mixes
 # upper and sentence case between rows, and the stepper spells three stages
@@ -216,7 +216,7 @@ def _delivered_at(raw: dict, events: list[dict]) -> str | None:
     if not day or not clock:
         return None
     try:
-        local = datetime.fromisoformat(f"{day}T{clock}").replace(tzinfo=_PAGE_TIMEZONE)
+        local = datetime.fromisoformat(f"{day}T{clock}").replace(tzinfo=_RESPONSE_TIMEZONE)
     except ValueError:
         return None
     return local.astimezone(timezone.utc).isoformat()

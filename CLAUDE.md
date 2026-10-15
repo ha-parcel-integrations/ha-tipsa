@@ -62,29 +62,30 @@ one hub per postcode.
   three. `No ha proporcionado el CP` / `Error en el CP` are our bugs, not user
   errors: the client raises, and the flow validation (`valid_postcode`, all
   whitespace stripped) is what keeps them from users.
-- **The parser reads an allow-list of cells and nothing else.** The page
-  asterisk-masks the recipient name, receiver and street address, then prints
-  the full address, town and postcode unmasked in other cells, so "skip masked
-  values" is not a privacy rule. The allow-list is `(section, label)` keyed and
-  lives in `parser.py`; everything outside it is dropped as it is tokenised.
+- **The reader takes an allow-list of fields and nothing else.** TIPSA
+  asterisk-masks the recipient name, receiver and street address, then states
+  the full address, town and postcode unmasked elsewhere in the reply, so
+  "skip masked values" is not a privacy rule. The allow-list is
+  `(section, label)` keyed and lives in `parser.py`; everything outside it is
+  dropped as the reply is read.
   That covers `Destinatario`, `Receptor`, `Dirección Destino`, `Población
   Destino`, `Código postal`, `Observaciones` (in **both** the general and the
   delivery block) and `Persona de contacto`, plus the whole `AGENCIA DESTINO`
   block — never into `raw`, never into `history`, never into a fixture. Do not
   read `Código postal` back to verify the user's postcode.
-  **A label only ever applies to the cell immediately after it.** Any other
-  leaf disarms it; a widened value cell would otherwise pass the label on to
-  the next unlabelled cell, which is how a forbidden value reached `sender`
+  **A label only ever applies to the field immediately after it.** Anything
+  else disarms it; a widened value would otherwise pass the label on to the
+  next unlabelled field, which is how a forbidden value reached `sender`
   before `test_a_value_cell_of_an_unexpected_width_does_not_arm_the_next_cell`
   existed.
   `tests/test_parser.py` and `tests/test_diagnostics.py` assert their absence.
   The invented values in `tests/payloads.py` exist only to prove that.
-- **History is ordered by reversing the page first.** The page lists newest
-  first; reverse, then stable-sort by minute, so rows sharing a minute keep the
-  page's chronology (a hub read before `TRANSITO`, an agency read before
-  `REPARTO`). Plain document order on ties would put the older row last and
-  make the newest-mappable-row fallback report the wrong status.
-- **`status` is the page's own status field**, else the newest mappable
+- **History is ordered by reversing the reply first.** TIPSA states the
+  newest row first; reverse, then stable-sort by minute, so rows sharing a
+  minute keep the reply's own order (a hub read before `TRANSITO`, an agency
+  read before `REPARTO`). Plain source order on ties would put the older row
+  last and make the newest-mappable-row fallback report the wrong status.
+- **`status` is TIPSA's own status field**, else the newest mappable
   history row, else `unknown`, with one warning for a wording the map does not
   know — even when the fallback resolves it, so a new wording still gets
   reported. `delivered_at` is the delivered history row (Madrid time for every
@@ -95,7 +96,7 @@ one hub per postcode.
   delivered. Mapping it to `problem` would make a healthy parcel look broken.
   It is the mapping a reviewer will want to re-litigate.
 - **Fields that are `None` on purpose:** `receiver` (never read),
-  `planned_from`/`planned_to` (the page has no ETA, so the hot polling tier
+  `planned_from`/`planned_to` (there is no ETA at all, so the hot polling tier
   starts as soon as a parcel is out for delivery and
   `*_parcel_delivery_time_changed` can never fire), `dimensions` (only a
   volume is shown) and `pickup_point`. `pickup_point` is in
@@ -119,29 +120,30 @@ one hub per postcode.
   rest of the shipper catalogue; any Portuguese or Andorran parcel; and what
   the gate wants for a Portuguese or Andorran postcode (the flow accepts the
   shapes permissively).
-- **`DISPONIBLE` and `INCIDENCIA` are prefix matches read off this same page.**
-  A shipper-side client cross-checked TIPSA's official status-code table
-  against a real parcel on `dinapaqweb`, event by event, and recorded what the
-  page printed for each code. That gives `DISPONIBLE` (code 14, available for
-  collection) and `incidencia` (code 4, with the reason appended) as page
-  wordings rather than shipper labels. `DISPONIBLE` is the only route to
-  `at_pickup_point`, so it is what makes `awaiting_pickup` reachable. The same
-  cross-check is why `Documentado` is known to appear as a history row.
+- **`DISPONIBLE` and `INCIDENCIA` are prefix matches in TIPSA's own
+  wording**, not shipper labels: `DISPONIBLE` (available for collection) and
+  `incidencia` (with the reason appended) were confirmed against a real
+  parcel, code by code — the research notes carry that cross-check.
+  `DISPONIBLE` is the only route to `at_pickup_point`, so it is what makes
+  `awaiting_pickup` reachable. The same check is why `Documentado` is known to
+  appear as a history row.
 - **Do not pre-map the rest of that catalogue.** Its labels are the shipper's,
-  and the page demonstrably prints different text (`En tránsito` → `TRANSITO`,
+  and TIPSA demonstrably reports different text (`En tránsito` → `TRANSITO`,
   `En reparto` → `REPARTO`), while six wordings seen live here appear nowhere
-  in it. It is also incomplete: code 8 is absent and code 18 occurs in
-  production but not in the table. Let the warning do its job.
+  in it. It is also incomplete — the gaps are in the research notes. Let the
+  warning do its job.
 - **`LEIDO EN DESTINO` and `Ausente` are mapped without a parcel of our own.**
-  `Ausente` (a failed delivery attempt) is the only route to
+  Both come from what TIPSA reports for other people's parcels. `Ausente`
+  (a failed delivery attempt) is the only route to
   `ParcelStatus.PROBLEM` this carrier currently has. Both are in
   `_UNCONFIRMED_WORDINGS`, so each asks once per HA run for confirmation
   rather than reporting nothing — the pre-1.0 rule. Take them out of that set
   once a tracked parcel has shown the wording.
 - **Never route on the tracking code's shape.** The 6+6+10 layout is shared with
   another Spanish carrier; the user picks the carrier.
-- **Decode the detail page as ISO-8859-1 explicitly**; it declares no charset.
-  Nothing is cached between polls, and no cookie, key or referer is sent.
+- **Nothing is cached between polls**, and no cookie, key or referer is sent.
+  The reply's character encoding is pinned in `api.py` rather than trusted —
+  the mechanics are in the research notes.
 
 ## Options and reloads
 
