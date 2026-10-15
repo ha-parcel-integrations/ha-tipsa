@@ -85,8 +85,9 @@ one hub per postcode.
   `REPARTO`). Plain document order on ties would put the older row last and
   make the newest-mappable-row fallback report the wrong status.
 - **`status` is the page's own status field**, else the newest mappable
-  history row, else `unknown` plus one warning; a resolved fallback does not
-  warn. `delivered_at` is the delivered history row (Madrid time for every
+  history row, else `unknown`, with one warning for a wording the map does not
+  know — even when the fallback resolves it, so a new wording still gets
+  reported. `delivered_at` is the delivered history row (Madrid time for every
   agency); the delivery block's date and time are local to the depot, an hour
   off in Portugal, so they are only the fallback.
 - **`Mal clasificado` is `in_transit` by decision, not evidence.** TIPSA draws

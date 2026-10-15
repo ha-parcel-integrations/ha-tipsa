@@ -122,20 +122,20 @@ def map_parcel_status(
 
     An absent field falls back to the history the same way an unmappable one
     does — a page that drops the field still knows its parcel was delivered.
-    Only when both fail is it ``unknown``, and the one-shot warning is kept for
-    a wording we could not map: an absent field is nothing to report.
+    Only when both fail is it ``unknown``. A wording we could not map is
+    reported either way, so a fallback that happens to work does not hide a
+    status the suite has never seen; an absent field is nothing to report.
     """
     wording = normalize_wording(current)
     if wording:
         mapped = map_event_status(current)
         if mapped is not None:
             return mapped
+        _warn_unmapped_status("current", current or "")
     for earlier in reversed(history_texts or []):
         fallback = map_event_status(earlier)
         if fallback is not None:
             return fallback
-    if wording:
-        _warn_unmapped_status("current", current or "")
     return ParcelStatus.UNKNOWN
 
 

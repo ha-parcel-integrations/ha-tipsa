@@ -116,7 +116,10 @@ def test_unmapped_status_falls_back_to_newest_mappable_history_row(caplog):
     history = ["PENDIENTE DE ENTREGAR A TIPSA", "TRANSITO", "Entrega parcial"]
     with caplog.at_level(logging.WARNING):
         assert map_parcel_status("Devuelto", history) is ParcelStatus.IN_TRANSIT
-    assert caplog.records == []  # a resolved fallback does not warn
+    # the fallback resolves the status, but the unknown wording is still reported
+    warnings = [r for r in caplog.records if "Unrecognised TIPSA" in r.getMessage()]
+    assert len(warnings) == 1
+    assert "DEVUELTO" in warnings[0].getMessage()
 
 
 def test_unmapped_status_with_no_mappable_history_warns_once(caplog):
