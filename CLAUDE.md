@@ -133,11 +133,11 @@ one hub per postcode.
   in it. It is also incomplete: code 8 is absent and code 18 occurs in
   production but not in the table. Let the warning do its job.
 - **`LEIDO EN DESTINO` and `Ausente` are mapped without a parcel of our own.**
-  Both come from another public tracker's live observations; `Ausente`
-  (a failed delivery attempt) is the only route to `ParcelStatus.PROBLEM`
-  this carrier currently has. They are everyday states, so leaving them to
-  warn would have trained users to ignore the warning. If a real parcel ever
-  contradicts either, that is a fix, not a surprise.
+  `Ausente` (a failed delivery attempt) is the only route to
+  `ParcelStatus.PROBLEM` this carrier currently has. Both are in
+  `_UNCONFIRMED_WORDINGS`, so each asks once per HA run for confirmation
+  rather than reporting nothing — the pre-1.0 rule. Take them out of that set
+  once a tracked parcel has shown the wording.
 - **Never route on the tracking code's shape.** The 6+6+10 layout is shared with
   another Spanish carrier; the user picks the carrier.
 - **Decode the detail page as ISO-8859-1 explicitly**; it declares no charset.

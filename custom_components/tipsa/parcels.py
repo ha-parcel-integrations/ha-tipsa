@@ -39,9 +39,6 @@ _PAGE_TIMEZONE = ZoneInfo("Europe/Madrid")
 # went on to be delivered, so ``problem`` would make a healthy parcel look
 # broken.
 #
-# ``LEIDO EN DESTINO`` and ``AUSENTE`` are mapped on another public tracker's
-# live observations rather than on a parcel tracked here. They are both
-# everyday states, so warning on them would train users to ignore the warning.
 _STATUS_MAP: dict[str, ParcelStatus] = {
     "PENDIENTE DE ENTREGAR A TIPSA": ParcelStatus.REGISTERED,
     "DOCUMENTADO": ParcelStatus.REGISTERED,
@@ -70,9 +67,14 @@ _PREFIX_MAP: tuple[tuple[str, ParcelStatus], ...] = (
     ("INCIDENCIA", ParcelStatus.PROBLEM),
 )
 
+# Mapped without a parcel of our own behind them, so each asks once for
+# confirmation. Empty the set as real parcels settle the wordings.
+_UNCONFIRMED_WORDINGS = frozenset({"LEIDO EN DESTINO", "AUSENTE"})
+
 # Wordings we have already warned about, so each is logged only once per HA
 # session instead of on every poll.
 _unmapped_statuses_logged: set[str] = set()
+_unconfirmed_wordings_logged: set[str] = set()
 
 
 def normalize_wording(text: str | None) -> str:
@@ -97,17 +99,35 @@ def _warn_unmapped_status(kind: str, wording: str) -> None:
     )
 
 
+def _warn_unconfirmed_wording(wording: str, mapped: ParcelStatus) -> None:
+    """Ask once for confirmation of a mapping no tracked parcel has shown."""
+    if wording in _unconfirmed_wordings_logged:
+        return
+    _unconfirmed_wordings_logged.add(wording)
+    _LOGGER.warning(
+        "TIPSA reported '%s', which this integration reads as '%s'. No parcel "
+        "tracked here has shown that wording yet — please confirm it looks "
+        "right: %s",
+        wording,
+        mapped,
+        NEW_STATUS_ISSUE_URL,
+    )
+
+
 def map_event_status(text: str | None) -> ParcelStatus | None:
     """Map one status wording to a canonical status, or ``None``.
 
-    Never warns: whether a gap matters depends on the caller, which owns the
-    one-shot warning.
+    Never warns about a gap — whether one matters depends on the caller, which
+    owns that one-shot warning. A mapping in `_UNCONFIRMED_WORDINGS` does ask
+    once for confirmation, because nothing here has seen it on a parcel.
     """
     wording = normalize_wording(text)
     if not wording:
         return None
     mapped = _STATUS_MAP.get(wording)
     if mapped is not None:
+        if wording in _UNCONFIRMED_WORDINGS:
+            _warn_unconfirmed_wording(wording, mapped)
         return mapped
     for prefix, status in _PREFIX_MAP:
         if wording.startswith(prefix):

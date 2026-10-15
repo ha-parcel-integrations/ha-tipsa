@@ -22,6 +22,7 @@ def reset_one_shot_warnings():
     from custom_components.tipsa import parcels
 
     parcels._unmapped_statuses_logged.clear()
+    parcels._unconfirmed_wordings_logged.clear()
     yield
 
 

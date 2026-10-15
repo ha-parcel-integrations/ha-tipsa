@@ -111,6 +111,24 @@ def test_a_missing_status_field_with_no_usable_history_is_unknown_and_silent(cap
     assert caplog.records == []
 
 
+def test_an_unconfirmed_wording_asks_for_confirmation_once(caplog):
+    with caplog.at_level(logging.WARNING):
+        assert map_parcel_status("Ausente") is ParcelStatus.PROBLEM
+        assert map_parcel_status("ausente") is ParcelStatus.PROBLEM
+        assert map_event_status("Leido en destino") is ParcelStatus.IN_TRANSIT
+    asks = [r for r in caplog.records if "please confirm" in r.getMessage()]
+    assert len(asks) == 2
+    assert {"AUSENTE", "LEIDO EN DESTINO"} == {
+        w for w in ("AUSENTE", "LEIDO EN DESTINO") if any(w in r.getMessage() for r in asks)
+    }
+
+
+def test_a_confirmed_wording_does_not_ask(caplog):
+    with caplog.at_level(logging.WARNING):
+        assert map_parcel_status("Entregado") is ParcelStatus.DELIVERED
+    assert "please confirm" not in caplog.text
+
+
 def test_unmapped_status_falls_back_to_newest_mappable_history_row(caplog):
     """Oldest to newest: the newest mappable row wins, an unmapped newer one is skipped."""
     history = ["PENDIENTE DE ENTREGAR A TIPSA", "TRANSITO", "Entrega parcial"]
