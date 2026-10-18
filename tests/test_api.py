@@ -61,6 +61,7 @@ async def test_get_parcel_runs_both_hops_and_parses():
         assert call.kwargs["headers"]["Accept-Language"].startswith("es-ES")
         assert "Cookie" not in call.kwargs["headers"]
         assert "Referer" not in call.kwargs["headers"]
+        assert "User-Agent" not in call.kwargs["headers"]
 
 
 async def test_postcode_is_stripped_of_all_whitespace_before_sending():
