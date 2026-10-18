@@ -45,7 +45,7 @@ Part of the [ha-parcel-integrations](https://ha-parcel-integrations.github.io/) 
 
 ## Requirements
 
-- Home Assistant 2024.12 or newer
+- Home Assistant 2025.12 or newer
 - A parcel delivered by TIPSA in Spain, Portugal or Andorra, and its
   22-digit tracking code (from the shipping confirmation or the missed-delivery
   card) — no account needed. The shorter waybill number on its own is not
