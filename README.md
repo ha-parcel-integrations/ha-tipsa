@@ -5,13 +5,13 @@
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> 📦 Part of [**ha-parcel-integrations**](https://ha-parcel-integrations.github.io/), a family of package-tracking integrations for Home Assistant that all publish the same parcel format, statuses and events, so they plug into cross-carrier automations and the optional [Parcel Aggregator](https://github.com/ha-parcel-integrations/ha-parcel-aggregator). Browse the other carriers on the website.
+>
 > 💬 Questions or feedback? Join the discussion on the [Home Assistant community](https://community.home-assistant.io/t/packages-postnl-dhl-nl-dpd-and-gls-parcel-integration/112433/).
 
 A custom Home Assistant integration that tracks your [TIPSA](https://www.tip-sa.com) parcels (Spain, Portugal and Andorra). No account is needed — you enter your delivery postcode once and then the 22-digit tracking code of each parcel, just like on the TIPSA website.
 
 > **Pre-1.0.** Built from one delivered Spanish parcel. Statuses for a return or a partial delivery, and parcels delivered in Portugal or Andorra, have not been seen yet: they show `unknown` and log one warning each, so please [open an issue](https://github.com/ha-parcel-integrations/ha-tipsa/issues/new?template=unrecognised_status.yml) when you see it. A warning names the status wording and nothing about you or your parcel.
-
-Part of the [ha-parcel-integrations](https://ha-parcel-integrations.github.io/) family: it publishes the same canonical parcel format, statuses and events as the other carrier integrations, so it plugs straight into the [Parcel Aggregator](https://github.com/ha-parcel-integrations/ha-parcel-aggregator) and cross-carrier automations.
 
 ## Contents
 
