@@ -1,10 +1,9 @@
 """Tests for TIPSA diagnostics."""
+
 from datetime import timedelta
 from unittest.mock import MagicMock
 
-from custom_components.tipsa.diagnostics import (
-    async_get_config_entry_diagnostics,
-)
+from custom_components.tipsa.diagnostics import async_get_config_entry_diagnostics
 from custom_components.tipsa.parcels import normalize_parcel
 from custom_components.tipsa.parser import parse_page
 
@@ -18,7 +17,9 @@ from .payloads import (
 )
 
 
-async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cells(hass):
+async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cells(
+    hass,
+):
     """Diagnostics get pasted into public issues - nothing identifying may survive.
 
     The parcel is built from the real page rather than a hand-made dict, so the
@@ -58,7 +59,16 @@ async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cel
     located = [event for event in raw["events"] if event["location"] is not None]
     assert located and all(e["location"] == "**REDACTED**" for e in located)
     # none of the identifiers, request values or the six forbidden cells survive
-    for value in (DELIVERED_CODE, POSTCODE, "08001", SERVICIO, DETAIL_URL, "SHOP-REF-1", "Example Shop", *FORBIDDEN_VALUES):
+    for value in (
+        DELIVERED_CODE,
+        POSTCODE,
+        "08001",
+        SERVICIO,
+        DETAIL_URL,
+        "SHOP-REF-1",
+        "Example Shop",
+        *FORBIDDEN_VALUES,
+    ):
         assert value not in dumped
     # status wordings stay readable, they are what an unrecognised-status report needs
     assert result["incoming"][0]["status"] == "delivered"

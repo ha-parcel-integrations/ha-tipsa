@@ -3,8 +3,9 @@
 These need no Home Assistant instance: ``parcels.py`` is free of I/O so the
 carrier-specific mapping can be tested as plain functions.
 """
+
+from datetime import UTC, datetime, timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -29,12 +30,7 @@ from custom_components.tipsa.parcels import (
     sort_parcels_by_ts,
 )
 
-from .payloads import (
-    DELIVERED_ROWS,
-    FORBIDDEN_VALUES,
-    active_sample,
-    delivered_sample,
-)
+from .payloads import DELIVERED_ROWS, FORBIDDEN_VALUES, active_sample, delivered_sample
 
 # ---------------------------------------------------------------------------
 # status mapping
@@ -42,7 +38,7 @@ from .payloads import (
 
 
 @pytest.mark.parametrize(
-    "wording,expected",
+    ("wording", "expected"),
     [
         ("ENTREGADO", ParcelStatus.DELIVERED),
         ("Entregado", ParcelStatus.DELIVERED),
@@ -91,9 +87,7 @@ def test_normalize_wording_folds_accents_case_and_whitespace():
 
 def test_map_parcel_status_uses_the_status_field_first():
     # the field says delivered even though the newest mappable row says transit
-    assert (
-        map_parcel_status("ENTREGADO", ["TRANSITO"]) is ParcelStatus.DELIVERED
-    )
+    assert map_parcel_status("ENTREGADO", ["TRANSITO"]) is ParcelStatus.DELIVERED
 
 
 def test_a_missing_status_field_still_falls_back_to_the_history(caplog):
@@ -119,7 +113,9 @@ def test_an_unconfirmed_wording_asks_for_confirmation_once(caplog):
     asks = [r for r in caplog.records if "please confirm" in r.getMessage()]
     assert len(asks) == 2
     assert {"AUSENTE", "LEIDO EN DESTINO"} == {
-        w for w in ("AUSENTE", "LEIDO EN DESTINO") if any(w in r.getMessage() for r in asks)
+        w
+        for w in ("AUSENTE", "LEIDO EN DESTINO")
+        if any(w in r.getMessage() for r in asks)
     }
 
 
@@ -142,7 +138,9 @@ def test_unmapped_status_falls_back_to_newest_mappable_history_row(caplog):
 
 def test_unmapped_status_with_no_mappable_history_warns_once(caplog):
     with caplog.at_level(logging.WARNING):
-        assert map_parcel_status("Devuelto", ["Entrega parcial"]) is ParcelStatus.UNKNOWN
+        assert (
+            map_parcel_status("Devuelto", ["Entrega parcial"]) is ParcelStatus.UNKNOWN
+        )
         assert map_parcel_status("Devuelto", None) is ParcelStatus.UNKNOWN
     warnings = [r for r in caplog.records if "Unrecognised TIPSA" in r.getMessage()]
     assert len(warnings) == 1
@@ -157,9 +155,9 @@ def test_unmapped_status_with_no_mappable_history_warns_once(caplog):
 
 def test_parse_iso_handles_z_naive_and_garbage():
     assert parse_iso("2026-04-29T13:12:42Z") == datetime(
-        2026, 4, 29, 13, 12, 42, tzinfo=timezone.utc
+        2026, 4, 29, 13, 12, 42, tzinfo=UTC
     )
-    assert parse_iso("2026-04-29T13:12:42").tzinfo is timezone.utc
+    assert parse_iso("2026-04-29T13:12:42").tzinfo is UTC
     assert parse_iso("nope") is None
     assert parse_iso(None) is None
 
@@ -293,7 +291,7 @@ def test_delivered_at_falls_back_to_the_delivery_block():
 
 
 @pytest.mark.parametrize(
-    "date,clock", [(None, None), ("2026-04-17", None), ("2026-04-17", "99:99")]
+    ("date", "clock"), [(None, None), ("2026-04-17", None), ("2026-04-17", "99:99")]
 )
 def test_delivered_at_is_none_without_a_usable_delivery_block(date, clock):
     raw = delivered_sample()
@@ -391,7 +389,7 @@ def _entry(filter_type: str, amount: int) -> MockConfigEntry:
 
 
 def _delivered_pair() -> list[dict]:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return [
         {"barcode": "RECENT", "delivered_at": (now - timedelta(days=1)).isoformat()},
         {"barcode": "OLD", "delivered_at": (now - timedelta(days=30)).isoformat()},

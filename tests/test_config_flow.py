@@ -24,7 +24,9 @@ from .payloads import ACTIVE_CODE, DELIVERED_CODE, POSTCODE
 
 
 def test_normalize_tracking_code_strips_spaces_dots_and_dashes():
-    assert normalize_tracking_code("0000 1000-0010.0000000000") == "0000100000100000000000"
+    assert (
+        normalize_tracking_code("0000 1000-0010.0000000000") == "0000100000100000000000"
+    )
     assert normalize_tracking_code("") == ""
     assert normalize_tracking_code(None) == ""
 
@@ -55,12 +57,17 @@ def test_valid_postcode_rejects_other_shapes(value):
 
 def test_parse_parcel_entry_splits_an_optional_postcode_override():
     assert parse_parcel_entry(f"{DELIVERED_CODE}") == (DELIVERED_CODE, None)
-    assert parse_parcel_entry(f" {DELIVERED_CODE} @ 08 001 ") == (DELIVERED_CODE, "08001")
+    assert parse_parcel_entry(f" {DELIVERED_CODE} @ 08 001 ") == (
+        DELIVERED_CODE,
+        "08001",
+    )
     assert parse_parcel_entry(f"{DELIVERED_CODE}@") == (DELIVERED_CODE, None)
 
 
 async def test_user_flow_creates_a_postcode_scoped_hub(hass):
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
     assert result["type"] == "form"
 
     result = await hass.config_entries.flow.async_configure(
@@ -75,7 +82,9 @@ async def test_user_flow_creates_a_postcode_scoped_hub(hass):
 
 
 async def test_user_flow_rejects_an_invalid_postcode(hass):
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_POSTAL_CODE: "280"}
     )
@@ -85,7 +94,9 @@ async def test_user_flow_rejects_an_invalid_postcode(hass):
 
 async def test_the_same_postcode_cannot_be_added_twice(hass):
     MockConfigEntry(domain=DOMAIN, unique_id=POSTCODE).add_to_hass(hass)
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_POSTAL_CODE: POSTCODE}
     )
@@ -95,7 +106,9 @@ async def test_the_same_postcode_cannot_be_added_twice(hass):
 
 async def test_a_second_postcode_gets_its_own_hub(hass):
     MockConfigEntry(domain=DOMAIN, unique_id=POSTCODE).add_to_hass(hass)
-    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_POSTAL_CODE: "08001"}
     )
@@ -205,10 +218,14 @@ async def test_options_ignores_blank_entries_and_de_duplicates(hass):
 
 
 async def test_options_remove_parcel(hass):
-    entry = _hub([{CONF_TRACKING_CODE: DELIVERED_CODE}, {CONF_TRACKING_CODE: ACTIVE_CODE}])
+    entry = _hub(
+        [{CONF_TRACKING_CODE: DELIVERED_CODE}, {CONF_TRACKING_CODE: ACTIVE_CODE}]
+    )
     entry.add_to_hass(hass)
     result = await _submit_codes(hass, entry, [ACTIVE_CODE])
-    assert [p[CONF_TRACKING_CODE] for p in result["data"][CONF_PARCELS]] == [ACTIVE_CODE]
+    assert [p[CONF_TRACKING_CODE] for p in result["data"][CONF_PARCELS]] == [
+        ACTIVE_CODE
+    ]
 
 
 async def test_options_can_clear_the_tracked_code_list(hass):

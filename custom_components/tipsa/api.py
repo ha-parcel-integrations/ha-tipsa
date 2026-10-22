@@ -16,11 +16,12 @@ The contract the coordinator relies on:
 Error messages never carry the tracking_code, the postcode or a URL: the first
 request URL holds the postcode and the second a shipment id.
 """
+
 from __future__ import annotations
 
+from html.parser import HTMLParser
 import logging
 import re
-from html.parser import HTMLParser
 from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
@@ -82,7 +83,7 @@ class _RefreshParser(HTMLParser):
         attr = dict(attrs)
         if (attr.get("http-equiv") or "").lower() != "refresh":
             return
-        match = re.search(r"url\s*=\s*(.+)$", attr.get("content") or "", re.I)
+        match = re.search(r"url\s*=\s*(.+)$", attr.get("content") or "", re.IGNORECASE)
         if match:
             self.target = match.group(1).strip().strip("'\"")
 
@@ -148,9 +149,13 @@ class TIPSAApiClient:
                     retry_after = float(header) if header else None
                 except ValueError:
                     retry_after = None  # an HTTP-date, not seconds
-                raise TIPSAApiError("HTTP 429", status_code=429, retry_after=retry_after)
+                raise TIPSAApiError(
+                    "HTTP 429", status_code=429, retry_after=retry_after
+                )
             if response.status != 200:
-                raise TIPSAApiError(f"HTTP {response.status}", status_code=response.status)
+                raise TIPSAApiError(
+                    f"HTTP {response.status}", status_code=response.status
+                )
             body = await response.read()
         return body.decode(encoding, errors="replace")
 

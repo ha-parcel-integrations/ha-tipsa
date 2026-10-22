@@ -1,4 +1,5 @@
 """Tests for the TIPSA refresh button."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.tipsa.button import TIPSARefreshButton

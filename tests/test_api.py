@@ -1,4 +1,5 @@
 """Tests for the TIPSA API client."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp
@@ -79,7 +80,7 @@ async def test_the_detail_body_is_decoded_as_latin_1():
     """Accented place names are mojibake if the charset is guessed."""
     rows = [("17/04/26 20:19", "ENTREGADO", "SANT JOAN DESPÍ")]
     body = detail_bytes(rows=rows)
-    assert "Í".encode("utf-8") not in body  # truly Latin-1 on the wire
+    assert "Í".encode() not in body  # truly Latin-1 on the wire
     session = _session(_lookup(DETAIL_URL), _response(body=body))
 
     parcel = await TIPSAApiClient(session).async_get_parcel(DELIVERED_CODE, POSTCODE)
@@ -99,12 +100,12 @@ async def test_empty_servicio_is_not_found_and_stops_after_one_request():
 async def test_never_falls_back_to_the_postcode_free_door():
     session = _session(_lookup(EMPTY_TARGET))
     await TIPSAApiClient(session).async_get_parcel(DELIVERED_CODE, POSTCODE)
-    assert all(
-        "datos_env" not in str(call) for call in session.get.call_args_list
-    )
+    assert all("datos_env" not in str(call) for call in session.get.call_args_list)
 
 
-@pytest.mark.parametrize("body", ["No ha proporcionado el CP", "<h1>Error en el CP</h1>"])
+@pytest.mark.parametrize(
+    "body", ["No ha proporcionado el CP", "<h1>Error en el CP</h1>"]
+)
 async def test_rejected_postcode_is_our_bug_and_logs_no_values(body, caplog):
     session = _session(_response(body=body.encode()))
 
@@ -202,14 +203,17 @@ async def test_cloudflare_interstitial_is_a_transport_failure():
 
 async def test_the_cloudflare_beacon_on_a_normal_page_is_not_a_challenge():
     page = detail_bytes().replace(
-        b"</body>", b"<script src='/cdn-cgi/challenge-platform/h/b/scripts/jsd/x'></script></body>"
+        b"</body>",
+        b"<script src='/cdn-cgi/challenge-platform/h/b/scripts/jsd/x'></script></body>",
     )
     session = _session(_lookup(DETAIL_URL), _response(body=page))
     assert await TIPSAApiClient(session).async_get_parcel(DELIVERED_CODE, POSTCODE)
 
 
 async def test_error_messages_never_carry_identifiers():
-    session = _session(_lookup(DETAIL_URL), _response(body=detail_bytes("0000900000900000000009")))
+    session = _session(
+        _lookup(DETAIL_URL), _response(body=detail_bytes("0000900000900000000009"))
+    )
     with pytest.raises(TIPSAApiError) as err:
         await TIPSAApiClient(session).async_get_parcel(DELIVERED_CODE, POSTCODE)
     text = str(err.value)
@@ -230,7 +234,9 @@ async def test_http_error_carries_the_status(hop):
 
 
 async def test_redirect_from_the_lookup_is_not_followed():
-    session = _session(_response(302, headers={"Location": "https://elsewhere.example/"}))
+    session = _session(
+        _response(302, headers={"Location": "https://elsewhere.example/"})
+    )
     with pytest.raises(TIPSAApiError) as err:
         await TIPSAApiClient(session).async_get_parcel(DELIVERED_CODE, POSTCODE)
     assert err.value.status_code == 302

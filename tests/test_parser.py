@@ -6,12 +6,7 @@ import pytest
 
 from custom_components.tipsa.parser import TIPSAParseError, clean_text, parse_page
 
-from .payloads import (
-    DELIVERED_CODE,
-    DELIVERED_ROWS,
-    FORBIDDEN_VALUES,
-    detail_html,
-)
+from .payloads import DELIVERED_CODE, DELIVERED_ROWS, FORBIDDEN_VALUES, detail_html
 
 
 def test_parses_the_permitted_cells():
@@ -103,7 +98,10 @@ def test_unparseable_numbers_and_dates_become_none():
         detail_html()
         .replace("0,86", "heavy")
         .replace("15/04/26 </div>", "soon </div>")
-        .replace("<div class='mdl-cell mdl-cell--3-col'>1 </div>", "<div class='mdl-cell mdl-cell--3-col'>x </div>")
+        .replace(
+            "<div class='mdl-cell mdl-cell--3-col'>1 </div>",
+            "<div class='mdl-cell mdl-cell--3-col'>x </div>",
+        )
         .replace(">20:19 <", ">late <")
     )
     parsed = parse_page(html, DELIVERED_CODE)
@@ -175,9 +173,7 @@ def test_a_history_row_with_the_wrong_cell_count_fails_closed():
 
 def test_a_history_row_with_a_bad_timestamp_fails_closed():
     with pytest.raises(TIPSAParseError, match="timestamp"):
-        parse_page(
-            detail_html(rows=[("yesterday", "ENTREGADO", " ")]), DELIVERED_CODE
-        )
+        parse_page(detail_html(rows=[("yesterday", "ENTREGADO", " ")]), DELIVERED_CODE)
 
 
 def test_clean_text_collapses_whitespace_and_nbsp():

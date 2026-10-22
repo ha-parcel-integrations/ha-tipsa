@@ -7,7 +7,10 @@ structure, scrubbed to placeholder values. Its recipient, contact, address,
 town, postcode and notes cells are filled with invented text purely so tests
 can prove they are never read; see :data:`FORBIDDEN_VALUES`.
 """
+
 from __future__ import annotations
+
+from custom_components.tipsa.parser import _events as parse_events
 
 ACTIVE_CODE = "0000200000200000000001"
 DELIVERED_CODE = "0000100000100000000000"
@@ -114,27 +117,27 @@ def detail_html(
 <div id='datos-generales' class='mdl-cell mdl-cell--12-col panel-datos'>
 <span>DATOS GENERALES</span></div>
 <div id='datos-generales-resto' class='mdl-cell mdl-cell--12-col panel-datos-resto mdl-grid'>
-{_pair('Remitente', sender)}
-{_pair('Destinatario', 'A*** E***** P*****')}
-{_pair('Persona de contacto', FORBIDDEN_VALUES[6])}
-{_pair('Dirección Destino', 'C***** I******** *')}
-{_pair('Población Destino', FORBIDDEN_VALUES[2])}
-{_pair('Código postal', FORBIDDEN_VALUES[3])}
-{_pair('Estado Actual', status)}
-{_pair('Referencia', 'SHOP-REF-1')}
-{_pair('Bultos', '1', 3)}
-{_pair('Fecha', '15/04/26', 3)}
-{_pair('Kilos', '0,86', 3)}
-{_pair('Volumen (m3)', '0.00', 3)}
-{_pair('Observaciones', FORBIDDEN_VALUES[4])}
+{_pair("Remitente", sender)}
+{_pair("Destinatario", "A*** E***** P*****")}
+{_pair("Persona de contacto", FORBIDDEN_VALUES[6])}
+{_pair("Dirección Destino", "C***** I******** *")}
+{_pair("Población Destino", FORBIDDEN_VALUES[2])}
+{_pair("Código postal", FORBIDDEN_VALUES[3])}
+{_pair("Estado Actual", status)}
+{_pair("Referencia", "SHOP-REF-1")}
+{_pair("Bultos", "1", 3)}
+{_pair("Fecha", "15/04/26", 3)}
+{_pair("Kilos", "0,86", 3)}
+{_pair("Volumen (m3)", "0.00", 3)}
+{_pair("Observaciones", FORBIDDEN_VALUES[4])}
 </div>
 <div id='datos-generales' class='mdl-cell mdl-cell--12-col panel-datos'>
 <span>AGENCIA DESTINO</span></div>
 <div id='datos-generales-resto' class='mdl-cell mdl-cell--12-col panel-datos-resto mdl-grid'>
-{_pair('Nombre', 'AGENCIA  04')}
-{_pair('Dirección', 'Calle de la Agencia 9')}
-{_pair('Población', 'TOWN ONE')}
-{_pair('Código postal', '88888')}
+{_pair("Nombre", "AGENCIA  04")}
+{_pair("Dirección", "Calle de la Agencia 9")}
+{_pair("Población", "TOWN ONE")}
+{_pair("Código postal", "88888")}
 </div>
 <div id="datos" class="datos mdl-grid mdl-cell mdl-cell--12-col">
 <div id='datos-generales' class="mdl-cell mdl-cell--12-col panel-datos">
@@ -164,16 +167,15 @@ def lookup_html(target: str | None = DETAIL_URL) -> str:
 
 
 EMPTY_TARGET = (
-    "https://dinapaqweb.tipsa-dinapaq.com/dinapaqweb/detalle_envio.php"
-    "?servicio=&fecha="
+    "https://dinapaqweb.tipsa-dinapaq.com/dinapaqweb/detalle_envio.php?servicio=&fecha="
 )
 
 
 def _events(rows: list[tuple[str, str, str]]) -> list[dict]:
     """Parsed events, oldest to newest, for sample dicts."""
-    from custom_components.tipsa.parser import _events as parse_events
-
-    return parse_events([[stamp, wording.strip(), town.strip()] for stamp, wording, town in rows])
+    return parse_events(
+        [[stamp, wording.strip(), town.strip()] for stamp, wording, town in rows]
+    )
 
 
 def delivered_sample(code: str = DELIVERED_CODE) -> dict:

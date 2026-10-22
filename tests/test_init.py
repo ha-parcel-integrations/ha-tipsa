@@ -1,4 +1,5 @@
 """Tests for TIPSA setup and unload."""
+
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.config_entries import ConfigEntryState
@@ -13,8 +14,7 @@ from custom_components.tipsa.const import (
     DOMAIN,
 )
 
-from .payloads import ACTIVE_CODE, POSTCODE
-from .payloads import active_sample as _sample
+from .payloads import ACTIVE_CODE, POSTCODE, active_sample as _sample
 
 OTHER_CODE = "0000300000300000000002"
 
@@ -23,7 +23,10 @@ async def test_setup_and_unload(hass):
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=DOMAIN,
-        options={CONF_POSTAL_CODE: POSTCODE, CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+        options={
+            CONF_POSTAL_CODE: POSTCODE,
+            CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}],
+        },
     )
     entry.add_to_hass(hass)
 
@@ -62,7 +65,10 @@ async def test_setup_retries_when_first_refresh_fails(hass):
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=DOMAIN,
-        options={CONF_POSTAL_CODE: POSTCODE, CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+        options={
+            CONF_POSTAL_CODE: POSTCODE,
+            CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}],
+        },
     )
     entry.add_to_hass(hass)
 
@@ -80,7 +86,10 @@ async def test_per_parcel_sensor_spawn_and_remove(hass):
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=DOMAIN,
-        options={CONF_POSTAL_CODE: POSTCODE, CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+        options={
+            CONF_POSTAL_CODE: POSTCODE,
+            CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}],
+        },
     )
     entry.add_to_hass(hass)
 
@@ -116,7 +125,10 @@ async def test_options_update_applies_live_without_reload(hass):
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=DOMAIN,
-        options={CONF_POSTAL_CODE: POSTCODE, CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+        options={
+            CONF_POSTAL_CODE: POSTCODE,
+            CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}],
+        },
     )
     entry.add_to_hass(hass)
 

@@ -1,8 +1,9 @@
 """Tests for the TIPSA services (track_parcel / untrack_parcel)."""
+
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from homeassistant.exceptions import ServiceValidationError
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.tipsa.const import (
@@ -11,11 +12,11 @@ from custom_components.tipsa.const import (
     CONF_TRACKING_CODE,
     DOMAIN,
 )
+from custom_components.tipsa.services import async_setup_services
 
 from .payloads import ACTIVE_CODE, DELIVERED_CODE, POSTCODE, active_sample
 
 _SAMPLE = active_sample()
-
 
 
 async def _setup(hass, parcels: list[dict] | None = None) -> MockConfigEntry:
@@ -66,9 +67,7 @@ async def test_track_parcel_normalizes_code(hass):
         )
         await hass.async_block_till_done()
 
-    assert entry.options[CONF_PARCELS] == [
-        {CONF_TRACKING_CODE: ACTIVE_CODE}
-    ]
+    assert entry.options[CONF_PARCELS] == [{CONF_TRACKING_CODE: ACTIVE_CODE}]
 
 
 async def test_track_parcel_rejects_a_bare_waybill(hass):
@@ -183,7 +182,10 @@ async def test_untrack_removes_from_every_hub_and_services_outlive_one_hub(hass)
     for entry in (first, second):
         hass.config_entries.async_update_entry(
             entry,
-            options={**entry.options, CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+            options={
+                **entry.options,
+                CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}],
+            },
         )
     with patch(
         "custom_components.tipsa.api.TIPSAApiClient.async_get_parcel",
@@ -203,8 +205,6 @@ async def test_untrack_removes_from_every_hub_and_services_outlive_one_hub(hass)
 
 
 async def test_services_raise_when_nothing_is_set_up(hass):
-    from custom_components.tipsa.services import async_setup_services
-
     async_setup_services(hass)
     for service, data in (
         ("track_parcel", {CONF_TRACKING_CODE: ACTIVE_CODE}),
@@ -233,9 +233,7 @@ async def test_track_parcel_duplicate_is_noop(hass):
 
 
 async def test_untrack_parcel_removes_from_options(hass):
-    entry = await _setup(
-        hass, parcels=[{CONF_TRACKING_CODE: ACTIVE_CODE}]
-    )
+    entry = await _setup(hass, parcels=[{CONF_TRACKING_CODE: ACTIVE_CODE}])
     with patch(
         "custom_components.tipsa.api.TIPSAApiClient.async_get_parcel",
         new=AsyncMock(return_value=_SAMPLE),
@@ -252,9 +250,7 @@ async def test_untrack_parcel_removes_from_options(hass):
 
 
 async def test_untrack_unknown_code_is_noop(hass):
-    entry = await _setup(
-        hass, parcels=[{CONF_TRACKING_CODE: ACTIVE_CODE}]
-    )
+    entry = await _setup(hass, parcels=[{CONF_TRACKING_CODE: ACTIVE_CODE}])
     with patch(
         "custom_components.tipsa.api.TIPSAApiClient.async_get_parcel",
         new=AsyncMock(return_value=_SAMPLE),

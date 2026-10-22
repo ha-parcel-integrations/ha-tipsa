@@ -12,12 +12,13 @@ pairs and anything else is dropped on the spot: the recipient, contact,
 address, town, postcode and notes fields never reach the result. Do not widen
 the allow-list without re-reading that boundary.
 """
+
 from __future__ import annotations
 
-import re
-import unicodedata
 from datetime import UTC, datetime
 from html.parser import HTMLParser
+import re
+import unicodedata
 from zoneinfo import ZoneInfo
 
 RESPONSE_TIMEZONE = ZoneInfo("Europe/Madrid")
@@ -63,7 +64,7 @@ def _fold(value: str) -> str:
 
 
 class _Div:
-    __slots__ = ("classes", "parts", "has_child_div")
+    __slots__ = ("classes", "has_child_div", "parts")
 
     def __init__(self, classes: set[str]) -> None:
         self.classes = classes
@@ -257,7 +258,9 @@ def parse_page(html: str, tracking_code: str) -> dict:
     inputs = parser.inputs
     rebuilt = f"{inputs['CodAgeCargo']}{inputs['CodAgeOri']}{inputs['Albaran']}"
     if inputs["envio-localizado"] != tracking_code or rebuilt != tracking_code:
-        raise TIPSAParseError("shipment page does not match the requested tracking_code")
+        raise TIPSAParseError(
+            "shipment page does not match the requested tracking_code"
+        )
 
     fields = parser.fields
     sender = fields.get("sender")
@@ -276,7 +279,9 @@ def parse_page(html: str, tracking_code: str) -> dict:
         "volume_m3": _number(fields.get("volume_m3")),
         "delivered_date": _date(fields.get("delivered_date")),
         "delivered_time": (
-            delivered_time if delivered_time and re.fullmatch(r"\d{2}:\d{2}", delivered_time) else None
+            delivered_time
+            if delivered_time and re.fullmatch(r"\d{2}:\d{2}", delivered_time)
+            else None
         ),
         "events": _events(parser.history_rows),
     }

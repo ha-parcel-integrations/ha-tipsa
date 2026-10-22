@@ -2,11 +2,16 @@
 
 The parcel mapping itself is covered by ``test_parcels.py``.
 """
+
+import asyncio
 from unittest.mock import AsyncMock
 
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.update_coordinator import UpdateFailed
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.tipsa import coordinator as coordinator_module
 from custom_components.tipsa.api import TIPSAApiError
 from custom_components.tipsa.const import (
     CONF_DELIVERED_FILTER_AMOUNT,
@@ -104,8 +109,6 @@ async def test_update_keeps_cached_payload_on_error(hass):
 
 
 async def test_update_raises_when_every_parcel_fails(hass):
-    from homeassistant.helpers.update_coordinator import UpdateFailed
-
     entry = _entry_with([{CONF_TRACKING_CODE: DELIVERED_CODE}])
     entry.add_to_hass(hass)
     client = AsyncMock()
@@ -162,8 +165,8 @@ async def test_delivered_code_skipped_from_fetch(hass):
     )
     entry.add_to_hass(hass)
     client = AsyncMock()
-    client.async_get_parcel.side_effect = (
-        lambda code, postcode: active_sample(code) if code == ACTIVE_CODE else delivered_sample()
+    client.async_get_parcel.side_effect = lambda code, postcode: (
+        active_sample(code) if code == ACTIVE_CODE else delivered_sample()
     )
     coordinator = TIPSACoordinator(hass, client, entry)
 
@@ -199,8 +202,6 @@ async def test_delivered_code_forgotten_when_untracked(hass):
 
 async def test_update_fetches_parcels_concurrently(hass):
     """All tracked parcels go out in one gather, not one-by-one."""
-    import asyncio
-
     entry = _entry_with(
         [{CONF_TRACKING_CODE: ACTIVE_CODE}, {CONF_TRACKING_CODE: DELIVERED_CODE}]
     )
@@ -272,8 +273,6 @@ async def test_first_refresh_fires_nothing(hass):
 
 
 async def test_event_carries_device_id(hass):
-    from homeassistant.helpers import device_registry as dr
-
     entry = _entry_with([{CONF_TRACKING_CODE: ACTIVE_CODE}])
     entry.add_to_hass(hass)
     device = dr.async_get(hass).async_get_or_create(
@@ -284,9 +283,7 @@ async def test_event_carries_device_id(hass):
     coordinator = TIPSACoordinator(hass, client, entry)
 
     events = []
-    hass.bus.async_listen(
-        f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e)
-    )
+    hass.bus.async_listen(f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e))
 
     client.async_get_parcel.return_value = _in_transit()
     await coordinator._async_update_data()
@@ -304,9 +301,7 @@ async def test_fires_status_changed_event(hass):
     coordinator = TIPSACoordinator(hass, client, entry)
 
     events = []
-    hass.bus.async_listen(
-        f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e)
-    )
+    hass.bus.async_listen(f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e))
 
     client.async_get_parcel.return_value = _in_transit()
     await coordinator._async_update_data()  # first refresh: suppressed
@@ -410,8 +405,6 @@ async def test_fires_registered_event_for_new_parcel(hass):
 
 def _with_eta(monkeypatch, window: dict):
     """TIPSA's page has no ETA, so inject one to exercise the shared event."""
-    from custom_components.tipsa import coordinator as coordinator_module
-
     real = coordinator_module.normalize_parcel
 
     def fake(raw, **kwargs):
@@ -493,7 +486,8 @@ async def test_postcode_override_and_hub_default_reach_the_client(hass):
 
 async def test_parcel_without_any_postcode_is_not_fetched(hass):
     entry = MockConfigEntry(
-        domain=DOMAIN, unique_id=DOMAIN,
+        domain=DOMAIN,
+        unique_id=DOMAIN,
         options={CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
     )
     entry.add_to_hass(hass)

@@ -6,7 +6,6 @@ import logging
 import re
 from typing import Any
 
-import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
@@ -15,6 +14,7 @@ from homeassistant.config_entries import (
 )
 from homeassistant.core import callback
 from homeassistant.helpers import selector
+import voluptuous as vol
 
 from .const import (
     CONF_DELIVERED_FILTER_AMOUNT,
@@ -168,7 +168,11 @@ class TIPSAOptionsFlowHandler(OptionsFlow):
                 )
         current_codes = [
             p[CONF_TRACKING_CODE]
-            + (f"{_OVERRIDE_SEPARATOR}{p[CONF_POSTAL_CODE]}" if p.get(CONF_POSTAL_CODE) else "")
+            + (
+                f"{_OVERRIDE_SEPARATOR}{p[CONF_POSTAL_CODE]}"
+                if p.get(CONF_POSTAL_CODE)
+                else ""
+            )
             for p in _current_parcels(self.config_entry)
         ]
         schema = vol.Schema(
