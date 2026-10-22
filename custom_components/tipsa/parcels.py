@@ -194,7 +194,7 @@ def build_history(
             continue
         text = event.get("status")
         status = map_event_status(text)
-        if status is None and normalize_wording(text):
+        if status is None and text is not None and normalize_wording(text):
             _warn_unmapped_status("history", text)
         entries.append(
             {"timestamp": event["timestamp"], "status": status, "raw_status": text}
