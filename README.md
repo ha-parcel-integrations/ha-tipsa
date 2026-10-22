@@ -60,7 +60,11 @@ A custom Home Assistant integration that tracks your [TIPSA](https://www.tip-sa.
 
 1. In HACS, choose the three-dot menu → **Custom repositories**.
 2. Add `https://github.com/ha-parcel-integrations/ha-tipsa` as an **Integration**.
-3. Install **TIPSA** and restart Home Assistant.
+3. Install **TIPSA** and restart Home Assistant if HACS asks you to.
+
+Or click the button below to open it directly in HACS:
+
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ha-parcel-integrations&repository=ha-tipsa&category=integration)
 
 ### Manual
 
@@ -68,7 +72,9 @@ Copy `custom_components/tipsa` into your `config/custom_components/` folder and 
 
 ## Configuration
 
-Add the integration via **Settings → Devices & Services → Add Integration → TIPSA** and enter the postcode your parcels are delivered to. You can add a second hub for a second address (home and work, say); the same postcode can only be added once.
+[![Open your Home Assistant instance and start setting up this integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=tipsa)
+
+Or set it up by hand: add the integration via **Settings → Devices & Services → Add Integration → TIPSA** and enter the postcode your parcels are delivered to. You can add a second hub for a second address (home and work, say); the same postcode can only be added once.
 
 Then add parcels via the integration's **Configure** dialog, the [`tipsa.track_parcel`](#services) service, or a [dashboard button](examples/dashboards/add_parcel_card.yaml). Each parcel needs only its 22-digit tracking code. A parcel addressed to a different postcode than its hub can be entered in the **Configure** dialog as `code@postcode`, or with the `postal_code` field of `tipsa.track_parcel`.
 
