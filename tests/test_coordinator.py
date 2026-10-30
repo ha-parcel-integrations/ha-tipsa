@@ -520,3 +520,27 @@ async def test_not_found_explains_all_three_causes_once(hass, caplog):
     # cause: the postal code is the recipient's, not the delivering depot's.
     assert ACTIVE_CODE in messages[0]
     assert "not the delivering depot's" in messages[0]
+
+
+async def test_a_parcel_the_delivered_list_leaves_out_still_fires_delivered(hass):
+    """The retention option limits the delivered sensor, never the events."""
+    first, second = ACTIVE_CODE, "SECOND000001"
+    entry = _entry_with([{CONF_TRACKING_CODE: first}, {CONF_TRACKING_CODE: second}])
+    entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_DELIVERED_FILTER_AMOUNT: 1}
+    )
+    client = AsyncMock()
+    coordinator = TIPSACoordinator(hass, client, entry)
+
+    delivered = []
+    hass.bus.async_listen(f"{DOMAIN}_parcel_delivered", lambda e: delivered.append(e))
+
+    client.async_get_parcel.side_effect = lambda code, *_a, **_k: active_sample(code)
+    await coordinator._async_update_data()
+    client.async_get_parcel.side_effect = lambda code, *_a, **_k: delivered_sample(code)
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert sorted(e.data["barcode"] for e in delivered) == sorted([first, second])
+    assert len(coordinator.delivered) == 1
