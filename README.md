@@ -123,6 +123,7 @@ Standard HA removal applies: **Settings → Devices & Services → TIPSA → ⋮
 | `sensor.tipsa_<postcode>_en_route_to_pickup_point` | Parcels heading for a pickup point. TIPSA does not announce this in advance, so it stays empty |
 | `sensor.tipsa_<postcode>_awaiting_pickup` | Parcels waiting at a TIPSA collection point |
 | `sensor.tipsa_<postcode>_delivered_parcels` | Recently delivered parcels (see the retention option) |
+| `calendar.tipsa_<postcode>_deliveries` | Read-only calendar of expected deliveries, no extra API calls |
 | `sensor.tipsa_<postcode>_last_successful_update` | Diagnostic: when TIPSA was last polled successfully |
 
 A delivered parcel moves from its per-parcel sensor to the delivered sensor automatically.
