@@ -35,10 +35,11 @@ you act in one of these areas:
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
-- **The optional pickup-point summaries are a pair.** A carrier that can tell
-  a parcel is destined for a pickup point exposes
-  `en_route_to_pickup_point` for `pickup is true` before it arrives; one that
-  can reach `ParcelStatus.AT_PICKUP_POINT` also exposes `awaiting_pickup`.
+- **The pickup-point summaries are a pair.** A carrier that can deliver to a
+  pickup point or locker exposes both `en_route_to_pickup_point` and
+  `awaiting_pickup`, even before a real parcel has shown the status or flag
+  (they read 0 until then; record it in `PENDING_*`). A carrier without pickup
+  points exposes neither and keeps `pickup` constantly False.
   See *Parcel contract* in `CONVENTIONS.md`. Say "pickup point", not
   "ServicePoint"/"parcel shop"/"locker", for the generic concept; the
   example carrier demonstrates both canonical sensors.
@@ -106,6 +107,13 @@ one hub per postcode.
   postcode-free sibling door, and offering it would hand every dashboard a
   link that bypasses the gate this integration deliberately goes through.
   The locator form was there briefly instead and is not a link to a parcel.
+- **`pickup` is route-based.** No structured destination field exists, so it
+  is true once the parcel (or any returned history row) reached
+  `at_pickup_point` and stays true after collection. `en_route_to_pickup_point`
+  therefore reads 0 until a pickup wording is seen; it excludes `returning`
+  and arrived parcels. `delivered` is `status is DELIVERED` only: no
+  back-at-sender signal has been seen, so a return is never `delivered`.
+  `planned_*` is always `None` (no ETA), through the shared window helpers.
 - **Keep `en_route_to_pickup_point` and `awaiting_pickup`, even though both
   are always empty today.** TIPSA runs a collection network — its own home page
   carries a "Localizador de Puntos de Recogida" and the `puntospickup`
