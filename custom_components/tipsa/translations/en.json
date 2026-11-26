@@ -105,6 +105,10 @@
         "postal_code": {
           "name": "Postal code",
           "description": "Delivery postal code. Picks the hub when several are set up. With a single hub, a postal code matching no hub is used for this parcel only."
+        },
+        "contents": {
+          "name": "Contents",
+          "description": "What is in the parcel, in your own words. Calling this again for a tracked parcel replaces it; an empty text clears it."
         }
       }
     },
@@ -115,6 +119,24 @@
         "tracking_code": {
           "name": "Tracking code",
           "description": "The TIPSA tracking code to stop tracking."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Update parcel contents",
+      "description": "Set what is in a parcel, in your own words, for a tracking code. An empty text clears it.",
+      "fields": {
+        "tracking_code": {
+          "name": "Tracking code",
+          "description": "The 22-digit TIPSA tracking code."
+        },
+        "contents": {
+          "name": "Contents",
+          "description": "What is in the parcel, in your own words. An empty text clears it."
+        },
+        "config_entry_id": {
+          "name": "Hub",
+          "description": "The hub to store this for. Needed when no hub lists the code yet."
         }
       }
     }
@@ -164,6 +186,11 @@
       "parcel": {
         "name": "Parcel {barcode}"
       }
+    }
+  },
+  "exceptions": {
+    "update_contents_entry_required": {
+      "message": "No hub lists this code. Choose the hub to store it for."
     }
   }
 }

@@ -28,6 +28,7 @@ TO_REDACT = {
     "barcode",
     "sender",
     "receiver",
+    "contents",
     "url",
     # parsed page fields
     "shop_reference",

@@ -105,6 +105,10 @@
         "postal_code": {
           "name": "Código postal",
           "description": "Código postal de entrega. Escolhe o hub quando existem vários. Com um único hub, um código postal que não corresponda a nenhum hub é usado apenas para esta encomenda."
+        },
+        "contents": {
+          "name": "Conteúdo",
+          "description": "O que está na encomenda, nas suas próprias palavras. Chamar novamente para uma encomenda acompanhada substitui o conteúdo; um texto vazio apaga-o."
         }
       }
     },
@@ -115,6 +119,24 @@
         "tracking_code": {
           "name": "Código de rastreio",
           "description": "O código de rastreio TIPSA a deixar de seguir."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Atualizar o conteúdo da encomenda",
+      "description": "Defina o que está numa encomenda, nas suas próprias palavras, para um código de seguimento. Um texto vazio apaga o conteúdo.",
+      "fields": {
+        "tracking_code": {
+          "name": "Código de rastreio",
+          "description": "O código de rastreio TIPSA de 22 dígitos."
+        },
+        "contents": {
+          "name": "Conteúdo",
+          "description": "O que está na encomenda, nas suas próprias palavras. Um texto vazio apaga-o."
+        },
+        "config_entry_id": {
+          "name": "Hub",
+          "description": "O hub para o qual guardar isto. Necessário quando nenhum hub conhece ainda o código."
         }
       }
     }
@@ -164,6 +186,11 @@
       "parcel": {
         "name": "Encomenda {barcode}"
       }
+    }
+  },
+  "exceptions": {
+    "update_contents_entry_required": {
+      "message": "Nenhum hub conhece este código. Escolha o hub para o qual o guardar."
     }
   }
 }

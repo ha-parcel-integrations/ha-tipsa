@@ -29,6 +29,7 @@ async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cel
     parcel = normalize_parcel(
         parse_page(detail_html(), DELIVERED_CODE), include_history=True
     )
+    parcel["contents"] = "Running shoes"
     entry = MagicMock()
     entry.options = {
         "postal_code": POSTCODE,
@@ -51,7 +52,7 @@ async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cel
     assert result["entry_options"]["postal_code"] == "**REDACTED**"
     assert result["entry_options"]["parcels"][0]["postal_code"] == "**REDACTED**"
     assert result["entry_options"]["parcels"][0]["tracking_code"] == "**REDACTED**"
-    for key in ("barcode", "sender"):
+    for key in ("barcode", "sender", "contents"):
         assert result["incoming"][0][key] == "**REDACTED**"
     raw = result["incoming"][0]["raw"]
     for key in ("tracking_code", "shop_reference", "sender"):
@@ -67,6 +68,7 @@ async def test_diagnostics_redacts_identifiers_and_never_holds_the_forbidden_cel
         DETAIL_URL,
         "SHOP-REF-1",
         "Example Shop",
+        "Running shoes",
         *FORBIDDEN_VALUES,
     ):
         assert value not in dumped

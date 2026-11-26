@@ -39,6 +39,7 @@ A custom Home Assistant integration that tracks your [TIPSA](https://www.tip-sa.
 - Per-parcel sensor with the canonical status (`registered` / `in_transit` / `out_for_delivery` / `delivered` / …), the carrier's own status text, the sender, the weight and the status history
 - Summary sensors: incoming parcels, next delivery, recently delivered parcels
 - `tipsa.track_parcel` / `tipsa.untrack_parcel` services, so a dashboard button can add a parcel
+- A `contents` field on every parcel, set in your own words with the `tipsa.update_contents` service or the `contents` field of `tipsa.track_parcel`; it titles the calendar event and shows on the next-delivery sensor
 - Events + device triggers for no-code automations (parcel registered, status changed, delivered)
 - Opt-in per-parcel status history
 - Manual refresh button and a diagnostic last-update sensor
@@ -164,8 +165,9 @@ Every payload is the full normalised parcel plus the hub's `device_id`. Events a
 
 | Service | Fields | Description |
 |---|---|---|
-| `tipsa.track_parcel` | `tracking_code`, `postal_code` (optional) | Start tracking a parcel. `postal_code` picks the hub when several are set up. |
+| `tipsa.track_parcel` | `tracking_code`, `postal_code` (optional), `contents` (optional) | Start tracking a parcel, optionally noting what is in it. `postal_code` picks the hub when several are set up. |
 | `tipsa.untrack_parcel` | `tracking_code` | Stop tracking a parcel |
+| `tipsa.update_contents` | `tracking_code`, `contents` (optional), `config_entry_id` (optional) | Set what is in a parcel, tracked or not; an empty `contents` clears it. It titles the calendar event and shows on the next-delivery sensor. It goes to every hub that lists the code, or to the one named by `config_entry_id`; with several hubs set up, a code no hub lists is refused unless you name the hub |
 
 ## Examples
 
